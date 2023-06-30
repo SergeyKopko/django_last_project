@@ -1,0 +1,92 @@
+
+h1 {
+    text-align: center;
+}
+
+
+.container-main {
+    width: 1600px;
+    height: 2000px;
+}
+.container-main > form {
+    text-align: center;
+}
+
+.reg-log > a > p {
+    display: inline;
+
+}
+
+
+.info_cab_exit > a > p {
+    margin-right: 20px;
+}
+
+
+
+.phone_cabinet_info {
+    width: 300px;
+    height: 75px;
+    border: 2px solid #ccc;
+    border-radius:5px; 5px;
+    padding-left: 7px;
+    font-size: 16px;
+
+}
+
+.email_username_cabinet_info {
+    margin-top:10px;
+    width: 300px;
+    height: 75px;
+    border-radius:5px; 5px;
+    padding-left: 7px;
+    word-wrap: break-word;
+    font-size: 16px;
+    border: 2px solid #ccc;
+}
+
+
+.address_cabinet_info {
+    width: 300px;
+    height: 75px;
+    border-radius:5px; 5px;
+    padding-left: 7px;
+    word-wrap: break-word;
+    font-size: 16px;
+    border: 2px solid #ccc;
+}
+
+button {
+    max-width: 300px;
+    max-height:50px;
+    margin-left: 50px;
+}
+.create_info_form {
+    margin: 25px;
+    margin-left: 50px;
+    border: 2px solid #ddd;
+    color: #ddd;
+    border-radius:: 5px;
+
+}
+
+.accept-lot {
+    max-width: 600px;
+    max-height:250px;
+    margin: 25px;
+    margin-left: 50px;
+    border: 2px solid #ddd;
+    color: rgba(255,255,255,0.);
+    border-radius:: 5px;
+    word-wrap: break-word;
+}
+.accept-lot > p {
+    font-size: 16px;
+}
+
+.input_accept {
+    display: block;
+    position: relative;
+    left: 750px;
+    top: -150px;
+}

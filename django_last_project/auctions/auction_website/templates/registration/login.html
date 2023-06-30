@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+            <form method="post">
+
+                {% csrf_token %}
+                <div>
+                    <div>
+                       {{ form.username }}
+                    </div>
+                    <br>
+                    <div>
+                        {{ form.password }}
+                    </div>
+                </div>
+                {% if form.errors %}
+                <p>Неверное имя пользователя или пароль!</p>
+                {% endif %}
+                <button type="submit">Войти</button>
+                <hr>
+            </form>
+</body>
+</html>

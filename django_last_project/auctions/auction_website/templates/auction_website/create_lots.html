@@ -1,0 +1,38 @@
+{% extends 'auction_website/base.html' %}
+
+{% block content %}
+
+<form method="post"  enctype="multipart/form-data">
+  <b>Создание лота</b>
+  {% csrf_token %}
+  <div>
+      {{ form.name }}
+  </div>
+  <div>
+    {{ form.description }}
+  </div>
+      <div>
+    {{ form.photo }}
+  </div>
+  <div>
+      {{ form.link_seller }}
+  </div>
+
+  <div>
+  {{ form.start_price }}
+  </div>
+  <div>
+      {{ form.geolocations }}
+  </div>
+  <div>
+      {{ form.start_time }}
+  </div>
+  <div>
+      {{ form.end_time }}
+  </div>
+    <button type="submit" class="btn btn-primary">
+        Создать лот
+    </button>
+</form>
+
+{% endblock %}

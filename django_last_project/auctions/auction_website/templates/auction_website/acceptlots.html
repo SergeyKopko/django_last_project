@@ -1,0 +1,26 @@
+{% extends 'auction_website/base.html' %}
+
+{% block content %}
+
+
+        <b>Подтверждение создание лота</b>
+        {%for j in form%}
+        <div>{% for i in form_lots %}
+             {%if j.lots_id_id == i.id and j.accept_status == "in_progress" %}
+            <div class="accept-lot">
+            <p style="text-align:center;"><b>Название лота:</b>{{ i.name }}</p>
+                <hr>
+            <p><b>Описание:</b> <br>{{ i.description }}</p>
+                <hr>
+            <p><b>Начальная цена:</b> <br>{{ i.start_price }}</p>
+            <p><b>Cтатус:</b>{{ j.accept_status }}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button class="input_accept" type="submit" value="{{i.id}}" name="{{ i.id }}">Подтвердить</button>
+                </form>
+            </div>
+        </div>
+        {%endif%}
+        {%endfor%}
+        {%endfor%}
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'auction_website/base.html' %}
+
+{% block content %}
+    <b style="margin-left: 50px">Кабинет пользователя</b>
+    <form method="post" action="{% url 'cabinet' %}">
+        {% csrf_token %}
+        <div>
+            <p style="margin-left: 50px" class="email_username_cabinet_info">ФИО Пользователя: {{ user.username }}<p/>
+            <p style="margin-left: 50px" class="email_username_cabinet_info">Электронная почта: {{ user.email }}<p/>
+        </div>
+        <div style="margin-left: 50px" class="phone_cabinet_info">
+            {% if user.phone == '' or user.phone == None %}
+            Моб.телефон:
+            <br>
+            {{ form.phone }}
+            {% else %}
+            Моб.телефон:
+            <br>
+            {{ user.phone }}
+            {% endif %}
+        </div>
+        <br>
+        <div style="margin-left: 50px" class="address_cabinet_info">
+            {% if user.address == '' or user.address == None %}
+            Адрес:
+
+            {{ form.address }}
+            {% else %}
+            Адрес:
+
+            {{ user.address }}
+            {% endif %}
+        </div>
+        <br>
+        <button class="btn btn-primary" style="margin-left: 50px">Добавить информацию о себе</button>
+    </form>
+{% endblock %}
