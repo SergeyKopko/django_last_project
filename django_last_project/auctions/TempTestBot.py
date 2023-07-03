@@ -7,8 +7,9 @@ import datetime as DT
 from datetime import datetime
 import time
 import json
+from cnfg import bot_token
 
-token = '6112420224:AAF0gLi1ZFYabFDubwjawFyjDMjmtJ0_JZc'
+token = bot_token
 bot = telebot.TeleBot(token)
 PHOTO_DIR = 'photo'
 conn = sqlite3.connect('auctions.db', check_same_thread=False)
