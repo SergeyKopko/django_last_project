@@ -17,8 +17,8 @@ with con:
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
         full_name TEXT, 
         phone_number TEXT, 
-        adress TEXT,
-        wailet BIGINEGER
+        address TEXT,
+        wallet BIGINTEGER
         try_strike INTEGER
         )
     """)
@@ -40,7 +40,7 @@ with con:
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         admin_id INTEGER,
         accept_status TEXT,
-        lots_id BIGINTEGER,
+        lots_id INTEGER,
         FOREIGN KEY (admin_id) REFERENCES Administration (id),
         FOREIGN KEY (lots_id) REFERENCES Lots (id)
         )
@@ -61,11 +61,11 @@ with con:
         """)
 
     con.execute("""
-    CREATE TABLE IF NOT EXISTS Traids (
+    CREATE TABLE IF NOT EXISTS Trades (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         lots_id BIGINTEGER,
         trade_info TEXT,
-        traids_status BIGINTEGER,
+        trades_status TEXT,
         FOREIGN KEY (lots_id) REFERENCES Lots (id)
         )
     """)
