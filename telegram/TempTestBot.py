@@ -1,10 +1,12 @@
 import telebot
+
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.types import InputMediaPhoto
 import sqlite3
 import os
 import datetime as DT
 from datetime import datetime
+import pandas as pd
 import time
 import json
 from cnfg import bot_token
@@ -14,15 +16,13 @@ bot = telebot.TeleBot(token)
 PHOTO_DIR = 'photo'
 conn = sqlite3.connect('auctions.db', check_same_thread=False)
 
-
-
 Main_keyb_dct = {"Мои аукционы": "menu:my_auc",
                  "Розыгрыш": "menu:lottery",
                  "Топ пользователей": "menu:top",
                  "Правила": "menu:rules",
                  "Статистика": "menu:stats",
                  "Помощь": "menu:help",
-                 "Участвовать": "menu:take_part"}
+                 "Участвовать2": "menu:take_part"}
 Return_to_menu_keyb_dct = {"Главное меню": "menu:main-menu"}
 
 
@@ -49,36 +49,63 @@ Trade_inline_keyb.add(InlineKeyboardButton("\U0001F552", callback_data="qwerty:t
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id,
-                     "Привет, я бот аукционов @coin_minsk. Я помогу Вам следить за выбранными лотами,"
-                     "и регулировать ход аукциона. А так же буду следить за Вашими накопленными балами. "
-                     "Удачных торгов 🤝", reply_markup=create_universal_inline_keyb(Main_keyb_dct))
+    # print(message)
+    if message.text == "/start":
+        bot.send_message(message.chat.id,
+                         "Привет, я бот аукционов @coin_minsk. Я помогу Вам следить за выбранными лотами,"
+                         "и регулировать ход аукциона. А так же буду следить за Вашими накопленными балами. "
+                         "Удачных торгов 🤝", reply_markup=create_universal_inline_keyb(Main_keyb_dct))
+    else:
+        print(message.text)
+        lot_id = message.text.split(' ')[1]
+        print("id LOTa", lot_id)
+        with conn:
+            name = [i[1] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            description = [i[2] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            start_price = [i[3] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            link_seller = [i[4] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            photo_1 = [i[5] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            geolocations = [i[6] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            start_time = [i[7] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            end_time = [i[8] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+        result = f"Название лота: {name[0]}\n" \
+                 f"Описание: {description[0]}\n" \
+                 f"Стартовая цена: {start_price[0]} руб.\n" \
+                 f"Расположение продавца: {geolocations[0]}\n" \
+                 f"Ссылка на продавца: {link_seller[0]}\n"
+        print(result)
+        with open(r'C:/Users/voyag/PycharmProjects/django_last_project/django_last_project/auctions/media/' + str(photo_1[0]), "rb") as img:
+            bot.send_photo(message.chat.id, photo=img, caption=result, reply_markup=Trade_inline_keyb)
+        # bot.send_message(call.message.chat.id, f"{result}", reply_markup=Trade_inline_keyb)
+        # bot.send_message(chat_id='@coin_minsk', text=f'{result}',
+        #                  parse_mode="Markdown", reply_markup=Trade_inline_keyb)
     # user_telegram_id = message.from_user.id
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split(":"))
 def query_handler(call):
     # bot.answer_callback_query(callback_query_id=call.id, )
-    if call.data.split(':')[1] == "take_part":
+    print(call.data.split(':'))
+    if call.data.split(':')[0] == "take_part2":
+        lot_id = call.data.split(':')[1]
+        print("id LOTa", lot_id)
         with conn:
-            name = [i[1] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
-            description = [i[2] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
-            start_price = [i[3] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
-            link_seller = [i[4] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
-            photo_1 = [i[5] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
-            geolocations = [i[6] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
-            start_time = [i[7] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
-            end_time = [i[8] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
-
+            name = [i[1] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            description = [i[2] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            start_price = [i[3] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            link_seller = [i[4] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            photo_1 = [i[5] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            geolocations = [i[6] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            start_time = [i[7] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
+            end_time = [i[8] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")]
         result = f"Название лота: {name[0]}\n" \
                  f"Описание: {description[0]}\n" \
                  f"Стартовая цена: {start_price[0]} руб.\n" \
                  f"Расположение продавца: {geolocations[0]}\n" \
                  f"Ссылка на продавца: {link_seller[0]}\n"
-
         with open("photo/" + photo_1[0], "rb") as img:
-            bot.send_photo(call.message.chat.id, photo=img)
-        bot.send_message(call.message.chat.id, f"{result}", reply_markup=Trade_inline_keyb)
+            bot.send_photo(call.message.chat.id, photo=img, caption=result, reply_markup=Trade_inline_keyb)
+        # bot.send_message(call.message.chat.id, f"{result}", reply_markup=Trade_inline_keyb)
         bot.send_message(chat_id='@coin_minsk', text=f'{result}',
                          parse_mode="Markdown", reply_markup=Trade_inline_keyb)
 
@@ -102,17 +129,12 @@ def query_handler(call):
             end_time2 = [i[8] for i in conn.execute(f"SELECT * FROM Lots WHERE id = 1")]
         start_time = datetime.strptime(str(current_datetime)[:19], "%Y-%m-%d %H:%M:%S")  # 2021-10-01 12:00:00
         end_time = datetime.strptime(end_time2[0], "%Y-%m-%d %H:%M:%S")
-        difference = end_time - start_time
-        days = difference.days  # Получаем целое количество дней из объекта timedelta
-        total_seconds = difference.total_seconds()  # Получаем общее количество секунд из объекта timedelta
-        hours = int(total_seconds // 3600)  # Преобразуем общее количество секунд в часы, минуты и секунды
-        minutes = int((total_seconds % 3600) // 60)
-        seconds = int(total_seconds % 60)
+        timedelta = pd.Timestamp(end_time) - pd.Timestamp(start_time)
         bot.answer_callback_query(call.id, f"Осталось времени: "
-                                           f"{days} дней "
-                                           f"{hours} часов "
-                                           f"{minutes} минут "
-                                           f"{seconds} секунд", show_alert=False)
+                                           f"{timedelta.components.days} дней "
+                                           f"{timedelta.components.hours} часов "
+                                           f"{timedelta.components.minutes} минут "
+                                           f"{timedelta.components.seconds} секунд", show_alert=False)
 
     if call.data.split(':')[1] == "rules":
         print("Отправляем текст c правилами")
@@ -136,20 +158,35 @@ def query_handler(call):
                               call.message.chat.id, call.message.message_id,
                               reply_markup=create_universal_inline_keyb(Return_to_menu_keyb_dct))
 
-# import requests
-# channel = "@coin_minsk"  # название вашего канала
-# photo = "photo/1.jpg"
-# text = "This is a test message" # текст сообщения
-# buttons = [[{"text": "Share", "url": "t.me/your_channel?start=your_post_id"}], # кнопка для пересылки
-#            [{"text": "Visit website", "url": "https://example.com"}]] # кнопка для перехода на сайт
-# data = {
-#     "chat_id": channel,
-#     "photo": photo,
-#     "caption": text,
-#     "reply_markup": {"inline_keyboard": buttons}
-# }
-# response = requests.post(f"https://api.telegram.org/bot{token}/sendPhoto", json=data)
-# print(response.json())
+
+
+# """___________________________________________________________________"""
+# cursor = conn.cursor()
+# # Функция для проверки изменений в базе данных
+# def check_db():
+#     cursor.execute("SELECT COUNT(*) FROM Lots")  # Запрашиваем количество записей в таблице Lots
+#     count = cursor.fetchone()[0]
+#     # Возвращаем True, если количество изменилось, иначе False
+#     global prev_count
+#     if count != prev_count:
+#         prev_count = count
+#         return True
+#     else:
+#         return False
+# # Функция для отправки сообщения об изменениях в базе данных
+# def send_message():
+#     cursor.execute("SELECT * FROM Lots ORDER BY id DESC LIMIT 1")  # Запрашиваем последнюю запись в таблице Lots
+#     lot = cursor.fetchone()
+#     # Формируем текст сообщения с данными пользователя
+#     text = f"Новый lot в базе данных:\nID: {lot[0]}\nИмя: {lot[1]}\nОписание: {lot[2]}"
+#     bot.send_message(chat_id='@coin_minsk', text=text)
+#     print("NEW LOT NEW LOT", text)
+# prev_count = 0  # Переменная для хранения предыдущего количества записей в базе данных
+# while True:  # Бесконечный цикл для мониторинга базы данных
+#     if check_db():  # Проверяем, есть ли изменения в базе данных
+#         send_message()  # Если есть, то отправляем сообщение о них
+#     time.sleep(5)  # Ждем х секунд перед следующей проверкой
+# """___________________________________________________________________"""
 
 
 print("Ready")

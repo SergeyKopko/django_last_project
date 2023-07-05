@@ -6,7 +6,6 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from telebot import types
-
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 from .models import Administration, Accept_lot, Lots
@@ -16,28 +15,25 @@ from django.views import View
 
 from .forms import UserCreationForm, LoginForm, CabinetForm, CreateLotsForm
 
-conn = sqlite3.connect(r'C:\Users\admin\django_last_project1\telegram\auctions.db',check_same_thread=False)
+conn = sqlite3.connect(r'C:\Users\voyag\PycharmProjects\django_last_project\telegram\auctions.db',check_same_thread=False)
 
 
 def send_message_to_bot(name, description, start_price, geolocations, link_seller, photo, callback_Lots_id):
     print('Отработала')
-    bot_token = '5937676517:AAEG8U11wayyFFQmbJKi3Y3BdINCzUTIDWs'
+    bot_token = '6112420224:AAF0gLi1ZFYabFDubwjawFyjDMjmtJ0_JZc'
     bot = telebot.TeleBot(token=bot_token)
     result = f"Название лота: {name}\n" \
              f"Описание: {description}\n" \
              f"Стартовая цена: {start_price} руб.\n" \
              f"Расположение продавца: {geolocations}\n" \
              f"Ссылка на продавца: {link_seller}\n"
-    keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton("Участвовать", callback_data=f'lots_id:{callback_Lots_id}'))
     print(callback_Lots_id)
-    keyboard.add(InlineKeyboardButton("\U0001F552", callback_data="qwerty:timeleft"), InlineKeyboardButton("\U00002139", callback_data="qwerty:info"))
-    photos = open(r'C:/Users/admin/django_last_project1/django_last_project/auctions/media/'+ str(photo), 'rb')
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(InlineKeyboardButton("Участвовать", url=f"https://t.me/Sun2307_bot?start={callback_Lots_id}"))
+    keyboard.add(InlineKeyboardButton("\U0001F552", callback_data="view:timeleft"),
+                 InlineKeyboardButton("\U00002139", callback_data="view:info"))
+    photos = open(r'C:/Users/voyag/PycharmProjects/django_last_project/django_last_project/auctions/media/' + str(photo), 'rb')
     bot.send_photo(chat_id='@coin_minsk', photo=photos, caption=result, reply_markup=keyboard)
-
-
-
-
 
 
 def main_window(request):
