@@ -1,6 +1,6 @@
 import sqlite3
 from pathlib import Path
-
+import json
 import telebot
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -34,6 +34,14 @@ def send_message_to_bot(name, description, start_price, geolocations, link_selle
                  InlineKeyboardButton("\U00002139", callback_data="view:info"))
     photos = open(r'C:/Users/voyag/PycharmProjects/django_last_project/django_last_project/auctions/media/' + str(photo), 'rb')
     bot.send_photo(chat_id='@coin_minsk', photo=photos, caption=result, reply_markup=keyboard)
+    trade_info = {}
+    trade_info_str = json.dumps(trade_info)
+    trades_status = 'in progress'
+    with conn:
+        conn.execute("INSERT OR IGNORE INTO Trades (lots_id, trade_info, trades_status, max_price) "
+                     "VALUES (?, ?, ?, ?)",
+                     (callback_Lots_id, trade_info_str, trades_status, start_price))  # добавьте новую запись в таблицу "Trades"
+    conn.commit()  # сохраняем изменения в базе данных
 
 
 def main_window(request):

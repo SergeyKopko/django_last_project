@@ -16,9 +16,9 @@ with con:
         CREATE TABLE IF NOT EXISTS Clients (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
         full_name TEXT, 
-        phone_number TEXT, 
+        telegram_id INTEGER, 
         address TEXT,
-        wallet BIGINTEGER
+        wallet INTEGER,
         try_strike INTEGER
         )
     """)
@@ -27,10 +27,10 @@ with con:
         CREATE TABLE IF NOT EXISTS Administration (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         full_name TEXT,
-        status TEXT
-        phone INTEGER
-        address TEXT
-        login TEXT
+        status TEXT,
+        phone INTEGER,
+        address TEXT,
+        login TEXT,
         password TEXT
         )
     """)
@@ -63,9 +63,10 @@ with con:
     con.execute("""
     CREATE TABLE IF NOT EXISTS Trades (
         id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-        lots_id BIGINTEGER,
+        lots_id INTEGER,
         trade_info TEXT,
         trades_status TEXT,
+        max_price INTEGER,
         FOREIGN KEY (lots_id) REFERENCES Lots (id)
         )
     """)
