@@ -133,7 +133,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-
+DATETIME_FORMAT="%Y-%m-%d%H:%M:%S"
+L10N=False
+USE_TZ=False
 LOGOUT_REDIRECT_URL = 'home'
 
 LOGIN_REDIRECT_URL = 'home'
