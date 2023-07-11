@@ -15,7 +15,8 @@ from django.views import View
 
 from .forms import UserCreationForm, LoginForm, CabinetForm, CreateLotsForm
 
-conn = sqlite3.connect(r'C:\Users\admin\django_last_project1\telegram\auctions.db',check_same_thread=False)
+conn = sqlite3.connect(r'C:\Users\voyag\PycharmProjects\django_last_project\telegram\auctions.db', check_same_thread=False)
+# conn = sqlite3.connect('/django_last_project/telegram/auctions.db', check_same_thread=False)
 
 
 def send_message_to_bot(name, description, start_price, geolocations, link_seller, photo, callback_Lots_id):
@@ -30,17 +31,18 @@ def send_message_to_bot(name, description, start_price, geolocations, link_selle
     print(callback_Lots_id)
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(InlineKeyboardButton("Участвовать", url=f"https://t.me/Sun2307_bot?start={callback_Lots_id}"))
-    keyboard.add(InlineKeyboardButton("\U0001F552", callback_data="view:timeleft"),
+    keyboard.add(InlineKeyboardButton("\U0001F552", callback_data=f"view:timeleft:{callback_Lots_id}"),
                  InlineKeyboardButton("\U00002139", callback_data="view:info"))
-    photos = open(r'C:/Users/admin/django_last_project1/django_last_project/auctions/media/' + str(photo), 'rb')
-    bot.send_photo(chat_id='@coin_minsk', photo=photos, caption=result, reply_markup=keyboard)
-    trade_info = {}
+    photos = open(r'C:/Users/voyag/PycharmProjects/django_last_project/django_last_project/auctions/media/' + str(photo), 'rb')
+    message = bot.send_photo(chat_id='@coin_minsk', photo=photos, caption=result, reply_markup=keyboard)
+    message_id = message.message_id
+    trade_info = {"bid_history": [message_id]}
     trade_info_str = json.dumps(trade_info)
     trades_status = 'in progress'
     with conn:
         conn.execute("INSERT OR IGNORE INTO Trades (lots_id, trade_info, trades_status, max_price) "
                      "VALUES (?, ?, ?, ?)",
-                     (callback_Lots_id, trade_info_str, trades_status, start_price))  # добавьте новую запись в таблицу "Trades"
+                     (callback_Lots_id, trade_info_str, trades_status, start_price))  # новая запись в таблицу "Trades"
     conn.commit()  # сохраняем изменения в базе данных
 
 
