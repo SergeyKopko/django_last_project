@@ -8,5 +8,6 @@ urlpatterns = [
     path('cabinet', cabinetAdministration, name='cabinet'),
     path('create_lots', createLots, name='create_lots'),
     path('acceptlots', AcceptLots, name='acceptlots'),
+    path('infolot', infoAboutLot, name='infolot')
 
 ]

@@ -1,11 +1,20 @@
 {% extends 'auction_website/base.html' %}
 
+
+
 {% block content %}
-    <b style="margin-left: 50px">Кабинет пользователя</b>
-    <form method="post" action="{% url 'cabinet' %}">
+
+    <div class="container_cabinet">
+
+            <p style="text-align:center; font-size:30px;"><b>Аукционная команда</b></p>
+            <a href="{%url 'cabinet' %}" style="margin-left: 50px" class="return_btn"><b>Кабинет пользователя</b></a>
+    <b>|</b>
+    <a href="{%url 'home' %}" class="return_btn"><b>Главное меню</b></a>
+    <div class="form_cabinet">
+            <form method="post" action="{% url 'cabinet' %}">
         {% csrf_token %}
         <div>
-            <p style="margin-left: 50px" class="email_username_cabinet_info">ФИО Пользователя: {{ user.username }}<p/>
+            <p style="margin-left: 50px" class="email_username_cabinet_info" >ФИО Пользователя: {{ user.username }}<p/>
             <p style="margin-left: 50px" class="email_username_cabinet_info">Электронная почта: {{ user.email }}<p/>
         </div>
         <div style="margin-left: 50px" class="phone_cabinet_info">
@@ -17,21 +26,28 @@
             Моб.телефон:
             <br>
             {{ user.phone }}
+
             {% endif %}
         </div>
         <br>
         <div style="margin-left: 50px" class="address_cabinet_info">
             {% if user.address == '' or user.address == None %}
             Адрес:
-
+            <br>
             {{ form.address }}
+
             {% else %}
             Адрес:
 
             {{ user.address }}
+
             {% endif %}
         </div>
         <br>
-        <button class="btn btn-primary" style="margin-left: 50px">Добавить информацию о себе</button>
+        <button class="btn btn-primary" style="margin-left: 50px">Добавить информацию</button>
+          <button class="btn btn-primary" style="margin-left: 50px" name="update">Изменить</button>
     </form>
+    </div>
+    </div>
+
 {% endblock %}

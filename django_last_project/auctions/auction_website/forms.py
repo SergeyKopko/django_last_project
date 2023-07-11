@@ -39,7 +39,7 @@ class CabinetForm(ModelForm):
     class Meta:
         model = User
 
-        fields = ('phone', 'address', 'cleaned_data', 'username')
+        fields = ('phone', 'address', 'cleaned_data')
 
         widgets = {
             'phone': TextInput(attrs={
@@ -48,6 +48,7 @@ class CabinetForm(ModelForm):
             'address': TextInput(attrs={
                 'placeholder': 'Введите ваш адрес'
             }),
+
         }
 
 

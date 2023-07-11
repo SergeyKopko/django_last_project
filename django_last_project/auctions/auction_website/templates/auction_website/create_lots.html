@@ -1,9 +1,11 @@
 {% extends 'auction_website/base.html' %}
 
 {% block content %}
-
+<p style="text-align:center; font-size:30px;"><b>Аукционная команда</b></p>
 <form method="post"  enctype="multipart/form-data">
-  <b>Создание лота</b>
+        <a href="{%url 'acceptlots' %}" style="margin-left: 50px" class="return_btn"><b>Подтверждение лота</b></a>
+    <b>|</b>
+    <a href="{%url 'home' %}" class="return_btn"><b>Главное меню</b></a>
   {% csrf_token %}
   <div>
       {{ form.name }}

@@ -1,23 +1,29 @@
 {% extends 'auction_website/base.html' %}
-
+{% load static %}
 {% block content %}
         {% if user.username != '' %}
-
-        <p style="text-align:right; margin-right: 50px;">Пользователь: {{ user.username }}<p/>
+<div class="home_container">
+            <p style="text-align:center; font-size:30px;"><b>Аукционная команда</b></p>
+            <div class="info_user">
+            <a href="{% url 'cabinet' %}" class="return_btn user_block">Пользователь: {{ user.username }}</a>
+            <a href="{% url 'logout' %}" class="return_btn user_block">Выйти</a>
+        </div>
         {% else %}
             <p></p>
         {% endif %}
             {% if user.is_authenticated %}
             <div class="info_cab_exit">
-                <a href="{% url 'cabinet' %}" style="text-align:right; text-decoration:none;"><p>Кабинет</p></a>
-                <a href="{% url 'create_lots' %}" style="text-align:right; text-decoration:none;"><p>Создание лотов</p></a>
-                <a href="{% url 'acceptlots' %}" style="text-align:right; text-decoration:none;"><p>Подтверждение лотов</p></a>
-                <a href="{% url 'logout' %}" style="text-align:right; text-decoration:none;"><p>Выйти</p></a>
+                <a href="{% url 'cabinet' %}" style="text-align:right; text-decoration:none;" class="return_btn"><p>Кабинет</p></a>
+                <a href="{% url 'create_lots' %}" style="text-align:right; text-decoration:none;" class="return_btn"><p>Создание лотов</p></a>
+                <a href="{% url 'acceptlots' %}" style="text-align:right; text-decoration:none;" class="return_btn"><p>Подтверждение лотов</p></a>
+                <a href="{% url 'infolot' %}" style="text-align:right; text-decoration:none;" class="return_btn"><p>Информация о подтвержденных лотах</p></a>
             </div>
         {% else %}
         <div class="reg-log">
-            <a href="{% url 'login' %}" style="text-align:right; text-decoration:none; margin-left: 40px;"><p>Авторизоваться</p></a>
-            <a href="{% url 'register' %}" style="text-align:right; text-decoration:none; margin-left: 20px;"><p>Регистрация</p></a>
+            <a href="{% url 'login' %}" style="text-align:right; text-decoration:none; margin-left: 40px;" class="return_btn"><p>Авторизоваться</p></a>
+            <a href="{% url 'register' %}" style="text-align:right; text-decoration:none; margin-left: 20px;" class="return_btn"><p>Регистрация</p></a>
         </div>
+</div>
+
         {% endif %}
 {% endblock %}

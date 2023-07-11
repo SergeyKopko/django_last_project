@@ -1,9 +1,12 @@
 {% extends 'auction_website/base.html' %}
 
 {% block content %}
-
-
-        <b>Подтверждение создание лота</b>
+<div class="info-banner">
+        <p style="text-align:center; font-size:30px;"><b>Аукционная команда</b></p>
+        <a href="{%url 'create_lots' %}" style="margin-left: 50px" class="return_btn"><b>Cоздание лота</b></a>
+    <b>|</b>
+    <a href="{%url 'home' %}" class="return_btn"><b>Главное меню</b></a>
+</div>
         {%for j in form%}
         <div>{% for i in form_lots %}
              {%if j.lots_id_id == i.id and j.accept_status == "in_progress" %}
