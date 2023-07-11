@@ -1,1 +1,1 @@
-bot_token = '6112420224:AAF0gLi1ZFYabFDubwjawFyjDMjmtJ0_JZc'
+bot_token_dima = '6112420224:AAF0gLi1ZFYabFDubwjawFyjDMjmtJ0_JZc'
