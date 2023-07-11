@@ -19,7 +19,8 @@ with con:
         telegram_id INTEGER, 
         address TEXT,
         wallet INTEGER,
-        try_strike INTEGER
+        try_strike INTEGER,
+        UNIQUE (telegram_id)
         )
     """)
 
