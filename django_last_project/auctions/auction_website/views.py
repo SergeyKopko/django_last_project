@@ -15,7 +15,7 @@ from django.views import View
 
 from .forms import UserCreationForm, LoginForm, CabinetForm, CreateLotsForm
 
-conn = sqlite3.connect(r'C:\Users\voyag\PycharmProjects\django_last_project\telegram\auctions.db',check_same_thread=False)
+conn = sqlite3.connect(r'C:\Users\admin\django_last_project1\telegram\auctions.db',check_same_thread=False)
 
 
 def send_message_to_bot(name, description, start_price, geolocations, link_seller, photo, callback_Lots_id):
@@ -32,7 +32,7 @@ def send_message_to_bot(name, description, start_price, geolocations, link_selle
     keyboard.add(InlineKeyboardButton("Участвовать", url=f"https://t.me/Sun2307_bot?start={callback_Lots_id}"))
     keyboard.add(InlineKeyboardButton("\U0001F552", callback_data="view:timeleft"),
                  InlineKeyboardButton("\U00002139", callback_data="view:info"))
-    photos = open(r'C:/Users/voyag/PycharmProjects/django_last_project/django_last_project/auctions/media/' + str(photo), 'rb')
+    photos = open(r'C:/Users/admin/django_last_project1/django_last_project/auctions/media/' + str(photo), 'rb')
     bot.send_photo(chat_id='@coin_minsk', photo=photos, caption=result, reply_markup=keyboard)
     trade_info = {}
     trade_info_str = json.dumps(trade_info)
@@ -93,15 +93,27 @@ def cabinetAdministration(request):
     }
     if request.method == 'POST':
         form = CabinetForm(request.POST)
+        # print(form)
         if form.is_valid():
             phone = request.POST.get('phone')
             address = request.POST.get('address')
-            Administration.objects.filter(username = request.user.username).update(phone = phone)
-            Administration.objects.filter(username = request.user.username).update(address = address)
+
+            Administration.objects.filter(pk=request.user.id).update(address=address)
+            Administration.objects.filter(pk=request.user.id).update(phone=phone)
+
             return redirect("cabinet")
-            # Administration.objects.filter(username=request.user.username).update(phone = Administration.phone+str(phone), address=Administration.address+str(address))
-    else:
-        pass
+            # Administration.objects.filter(username=request.user.username).update(phone = Administration.phone+str(phone), address=Administration.address+str(address))\
+        if 'update' in request.POST:
+
+            # print(list(request.POST.values()))
+            Administration.objects.filter(pk=request.user.id).update(address="")
+            Administration.objects.filter(pk=request.user.id).update(phone="")
+
+
+
+
+            return redirect("cabinet")
+
     return render(request, link_address, context=context)
 
 def createLots(request):
@@ -121,6 +133,7 @@ def createLots(request):
             start_time_lot_in_db_telegram = lots_id.start_time
             end_time_lot_in_db_telegram = lots_id.end_time
             photo_lot_in_db_telegram = lots_id.photo
+            print(end_time_lot_in_db_telegram, ' ----', start_time_lot_in_db_telegram)
             lots_table = "INSERT OR IGNORE INTO Lots (name, descriptions, start_price, link_seller, geolocations,start_time, end_time, photo) values(?, ?, ?, ?, ?, ?, ?, ?)"
             admin_id_lot_in_db_telegram = Administration.objects.last().id
             lots_id_lot_in_db_telegram = lots_id.id
@@ -130,7 +143,7 @@ def createLots(request):
                 conn.execute(acceptlots_table, [admin_id_lot_in_db_telegram, lots_id_lot_in_db_telegram, 'in_progress'])
             Accept_lot.objects.create(admin_id = Administration.objects.last(), lots_id = lots_id, accept_status = 'in_progress')
             # print(Accept_lot.objects.all())
-            return redirect('home')
+            return redirect('create_lots')
 
 
     form = CreateLotsForm()
@@ -166,11 +179,24 @@ def AcceptLots(request):
         'form_lots':lots_list,
         'form': form
     }
-
-
-
-
-
     return render(request, link_address, context=context)
+
+
+def infoAboutLot(request):
+    link_address = 'auction_website/infolot.html'
+    acc_lot = Accept_lot.objects.filter(accept_status='confirmed')
+    lot_id = [i.lots_id for i in acc_lot]
+    list_lot_in_infolot = []
+    for i in lot_id:
+        lots = Lots.objects.filter(pk = i.id)
+        print(lots)
+        if lots:
+            list_lot_in_infolot.append(lots)
+    print(list_lot_in_infolot)
+    context = {
+        'form': list_lot_in_infolot
+    }
+    return render(request, link_address, context=context)
+
 
 

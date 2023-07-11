@@ -1,0 +1,13 @@
+{% extends 'auction_website/base.html' %}
+
+{% block content %}
+  {% for lot_list in form %}
+    {% for lot in lot_list %}
+<div class="lot_info">
+  <p><b>Наименование лота:</b> {{lot.name}}</p>
+  <p><b>Описание лота:</b> {{lot.description}}</p>
+  <img src="{{ lot.photo.url }}" style="overflow: hidden; width:150px; height:150px;" alt="#">
+</div>
+  {%endfor%}
+  {%endfor%}
+{% endblock %}
