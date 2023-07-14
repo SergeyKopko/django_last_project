@@ -1,5 +1,4 @@
 import telebot
-
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.types import InputMediaPhoto
 import sqlite3
@@ -9,9 +8,18 @@ from datetime import datetime
 import pandas as pd
 import time
 import json
-from cnfg import bot_token
+from cnfg import bot_token_dima
 
-token = bot_token
+# import django
+# from django_last_project.auctions.auction_website.models import Traids
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+# django.setup()
+# trade = Traids.objects.create(lots=1, trade_info="description", traids_status="traids_status")
+# trade.save()
+
+
+
+token = bot_token_dima
 bot = telebot.TeleBot(token)
 PHOTO_DIR = 'photo'
 conn = sqlite3.connect('auctions.db', check_same_thread=False)
@@ -126,8 +134,8 @@ def start(message):
             user_first_name = message.from_user.first_name
             try:
                 with conn:
-                    conn.execute("INSERT OR IGNORE INTO Clients (full_name, telegram_id) VALUES (?, ?)",
-                                 (user_first_name, user_telegram_id))
+                    conn.execute("INSERT OR IGNORE INTO Clients (full_name, telegram_id, try_strike) VALUES (?, ?, ?)",
+                                 (user_first_name, user_telegram_id, 0))
                 conn.commit()
             except Exception as e:
                 print(e)
@@ -223,26 +231,35 @@ def query_handler(call):
         user_telegram_id = call.message.chat.id
         try:
             with conn:
-                trade_info_lst = [i[2] for i in conn.execute(f"SELECT * FROM Trades")]
+                trade_info_lst = [i[2] for i in conn.execute(f"SELECT * FROM Trades WHERE trades_status = 'finished'")]
         except Exception as e:
             print(e)
         print(trade_info_lst)
-        result = 'В приняли участие в торгах по следующим лотам:\n'
+        result = ""
         for info in trade_info_lst:
             trade_info = json.loads(info)
-            trade_number = trade_info_lst.index(info) + 1
-            max_user_bid = trade_info[str(user_telegram_id)][1]
-            try:
-                with conn:
-                    lot_id = [i[1] for i in conn.execute(f"SELECT * FROM Trades WHERE id = {trade_number}")][0]
-                    lot_name = [i[1] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")][0]
-                    max_price = [i[4] for i in conn.execute(f"SELECT * FROM Trades WHERE lots_id = {trade_number}")][0]
-            except Exception as e:
-                print(e)
-            if user_telegram_id in trade_info["bid_history"] and trade_info["bid_history"][-1] == user_telegram_id:
-                result += f"Лот {trade_number}: {lot_name} - выигран. Выигрышная ставка: {max_price} руб.\n"
-            if user_telegram_id in trade_info["bid_history"] and trade_info["bid_history"][-1] != user_telegram_id:
-                result += f"Лот {trade_number}: {lot_name} -  не выигран. Максимальная ставка: {max_user_bid} руб.\n"
+            if str(user_telegram_id) in trade_info:
+                trade_number = trade_info_lst.index(info) + 1
+                max_user_bid = trade_info[str(user_telegram_id)][1]
+                number_of_bids = trade_info["bid_history"].count(user_telegram_id)
+                try:
+                    with conn:
+                        lot_id = [i[1] for i in conn.execute(f"SELECT * FROM Trades WHERE id = {trade_number}")][0]
+                        lot_name = [i[1] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")][0]
+                        max_price = [i[4] for i in conn.execute(f"SELECT * FROM Trades WHERE lots_id = {trade_number}")][0]
+                except Exception as e:
+                    print(e)
+                if user_telegram_id in trade_info["bid_history"] and trade_info["bid_history"][-1] == user_telegram_id:
+                    result += f"Лот {trade_number}: {lot_name} - выигран. Сделано ставок: {number_of_bids}. " \
+                              f"Выигрышная ставка: {max_price} руб.\n"
+                if user_telegram_id in trade_info["bid_history"] and trade_info["bid_history"][-1] != user_telegram_id:
+                    result += f"Лот {trade_number}: {lot_name} -  не выигран. Сделано ставок: {number_of_bids}. " \
+                              f"Максимальная ставка: {max_user_bid} руб.\n"
+
+        if len(result) > 0:
+            result = "Вы приняли участие в торгах по следующим лотам:\n" + result
+        else:
+            result = "Вы еще не принимали участие в торгах либо торги по лоту еще не завершились\n"
         print(result)
         bot.edit_message_text(f"{result}",
                               call.message.chat.id, call.message.message_id,
@@ -285,9 +302,63 @@ def query_handler(call):
                               "Удачных торгов и выгодных покупок!.",
                               call.message.chat.id, call.message.message_id,
                               reply_markup=create_universal_inline_keyb(Return_to_menu_keyb_dct))
+    if call.data.split(':')[1] == "top":
+        print("Отправляем текст c top юзерами по количеству баллов")
+        top_users_lst = [f"{i[0][:3] if len(i[0]) >= 3 else i[0][:1]} | Баллов: {i[1]}\n" for i in
+                         conn.execute(f"SELECT DISTINCT full_name, try_strike FROM Clients ORDER BY try_strike DESC")]
+        print(top_users_lst)
+        result = f""
+        num = 1
+        if len(top_users_lst) > 12:
+            for user in top_users_lst:
+                result += f"{num}) {user}"
+                num += 1
+        else:
+            for user in top_users_lst[:]:
+                result += f"{num}) {user}"
+                num += 1
+        print(result)
+        bot.edit_message_text(f"{result}",
+                              call.message.chat.id, call.message.message_id,
+                              reply_markup=create_universal_inline_keyb(Return_to_menu_keyb_dct))
+    if call.data.split(':')[1] == "stats":
+        print("Отправляем текст cо статистикой участия юзера в аукционах")
+        user_telegram_id = call.message.chat.id
+        try:
+            with conn:
+                trade_info_lst = [i[2] for i in conn.execute(f"SELECT * FROM Trades WHERE trades_status = 'finished'")]
+        except Exception as e:
+            print(e)
+        print(trade_info_lst)
+        result = ""
+        for info in trade_info_lst:
+            trade_info = json.loads(info)
+            if str(user_telegram_id) in trade_info:
+                trade_number = trade_info_lst.index(info) + 1
+                max_user_bid = trade_info[str(user_telegram_id)][1]
+                number_of_bids = trade_info["bid_history"].count(user_telegram_id)
+                try:
+                    with conn:
+                        lot_id = [i[1] for i in conn.execute(f"SELECT * FROM Trades WHERE id = {trade_number}")][0]
+                        lot_name = [i[1] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {lot_id}")][0]
+                        max_price = [i[4] for i in conn.execute(f"SELECT * FROM Trades WHERE lots_id = {trade_number}")][0]
+                except Exception as e:
+                    print(e)
+                if user_telegram_id in trade_info["bid_history"] and trade_info["bid_history"][-1] == user_telegram_id:
+                    result += f"Лот {trade_number}: {lot_name} - выигран. Сделано ставок: {number_of_bids}. " \
+                              f"Выигрышная ставка: {max_price} руб.\n"
+                if user_telegram_id in trade_info["bid_history"] and trade_info["bid_history"][-1] != user_telegram_id:
+                    result += f"Лот {trade_number}: {lot_name} -  не выигран. Сделано ставок: {number_of_bids}. " \
+                              f"Максимальная ставка: {max_user_bid} руб.\n"
 
-
-
+        if len(result) > 0:
+            result = "Вы приняли участие в торгах по следующим лотам:\n" + result
+        else:
+            result = "Вы еще не принимали участие в торгах либо торги по лоту еще не завершились\n"
+        print(result)
+        bot.edit_message_text(f"{result}",
+                              call.message.chat.id, call.message.message_id,
+                              reply_markup=create_universal_inline_keyb(Return_to_menu_keyb_dct))
     if call.data.split(':')[0] == "bid":
         current_bid = int(call.data.split(':')[1])
         current_lot_id = call.data.split(':')[2]
@@ -326,6 +397,8 @@ def query_handler(call):
                 trade_info[str(user_telegram_id)] = [current_bid, max_price]  # записываем юзера и ставку в словарь в список
                 trade_info["bid_history"].append(user_telegram_id)
                 trade_info_str = json.dumps(trade_info)  # Преобразуем объект обратно в строку для записи в БД
+
+
                 with conn:
                     conn.execute("UPDATE Trades SET trade_info = ? WHERE lots_id = ?",
                                  (trade_info_str, current_lot_id))  # обновляем информацию по торгу "Trades"
@@ -334,6 +407,8 @@ def query_handler(call):
                     conn.execute("UPDATE Clients SET try_strike = ? WHERE telegram_id = ?",
                                  (3, user_telegram_id))
                 conn.commit()
+
+
                 with conn:
                     name = [i[1] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {current_lot_id}")]
                     description = [i[2] for i in conn.execute(f"SELECT * FROM Lots WHERE id = {current_lot_id}")]
@@ -603,11 +678,18 @@ def query_handler(call):
             msg_id = trade_info["bid_history"][0]
             if len(trade_info["bid_history"]) > 1:
                 winner_id = trade_info["bid_history"][-1]
-                point_dct = {}
+                point_dct = {10: [0, 249], 20: [250, 499], 30: [500, 999], 50: [1000, 1999], 150: [2000, 4999],
+                             300: [5000, 9999], 500: [10000, 19999], 1000: [20000, 29999], 2000: [30000, 100000000]}
+                point = [i[5] for i in conn.execute(f"SELECT * FROM Clients WHERE telegram_id = {winner_id}")][0]
+                for key, value in point_dct.items():
+                    if value[0] <= max_price <= value[1]:
+                        point += key
                 with conn:
                     winner_name = [i[1] for i in conn.execute(f"SELECT * FROM Clients WHERE telegram_id = {winner_id}")][0]
                     conn.execute("UPDATE Clients SET try_strike = ? WHERE telegram_id = ?",
-                                 (3, winner_id))
+                                 (point, winner_id))
+                    conn.execute("UPDATE Trades SET trades_status = ? WHERE lots_id = ?",
+                                 ("finished", current_lot_id))  # добавьте новую запись в таблицу "Trades"
                     result += f"\U0001F3C6Победитель: {winner_name} (Финальная цена: {max_price} руб.)"
             else:
                 winner_name = "Победителей нет."
@@ -712,7 +794,7 @@ def query_handler(call):
         bot.delete_message(call.message.chat.id, msg.message_id)
 
         """__________________________________________________________________________________________________________"""
-        for i in range(100):  # цикл для мониторинга базы данных
+        for i in range(10):  # цикл для мониторинга базы данных
             if check_db(current_lot_id, count_bid, last_bid, user_telegram_id):  # Проверяем, есть ли изменения в базе данных
                 print("изменения есть, кто-то сделал ставку")
                 # Если есть, то обновляем карточку и отправляем сообщение
@@ -793,7 +875,7 @@ def query_handler(call):
                                                              f"Следите за ставками, делайте Ваши ставки!")
                 time.sleep(5)
                 bot.delete_message(call.message.chat.id, msg.message_id)
-            time.sleep(20)  # Ждем х секунд перед следующей проверкой
+            time.sleep(5)  # Ждем х секунд перед следующей проверкой
         """__________________________________________________________________________________________________________"""
 
 
